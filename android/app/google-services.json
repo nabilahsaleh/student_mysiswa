@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "254546470262",
+    "project_id": "student-card-appointment-f7812",
+    "storage_bucket": "student-card-appointment-f7812.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254546470262:android:078b97a344807b25d58657",
+        "android_client_info": {
+          "package_name": "com.example.student_mysiswa"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC2Uu3nR_T9hLMNJ-kQXWZwuxCC9wEZvTw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
