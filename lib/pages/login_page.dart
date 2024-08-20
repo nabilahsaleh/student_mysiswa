@@ -1,9 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:student_mysiswa/components/my_button.dart';
 import 'package:student_mysiswa/components/my_textfield.dart';
 import 'package:student_mysiswa/helper/helper_functions.dart';
 import 'package:student_mysiswa/pages/home_page.dart';
+import 'package:student_mysiswa/pages/admin_page.dart'; // Assume this is your admin page
 
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
@@ -34,19 +36,28 @@ class _LoginPageState extends State<LoginPage> {
 
     try {
       // Log in user
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
+      UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text,
         password: passwordController.text,
       );
 
+      // Get user role from Firestore
+      DocumentSnapshot userDoc = await FirebaseFirestore.instance.collection('users').doc(userCredential.user?.uid).get();
+      String role = userDoc.get('role');
+
       // Pop loading circle
       if (mounted) Navigator.pop(context);
 
-      // Navigate to HomePage after successful login
-      if (mounted) {
+      // Navigate based on role
+      if (role == 'admin') {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
+          MaterialPageRoute(builder: (context) => const AdminPage()), // Admin page
+        );
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const HomePage()), // Student page
         );
       }
     } on FirebaseAuthException catch (e) {

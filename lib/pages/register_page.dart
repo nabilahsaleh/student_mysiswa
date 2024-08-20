@@ -69,6 +69,7 @@ class _RegisterPageState extends State<RegisterPage> {
         'name': nameController.text,
         'phone_number': phoneNumberController.text,
         'id': idController.text,
+        'role': 'student', // Default role or based on some criteria
       });
     }
   }
