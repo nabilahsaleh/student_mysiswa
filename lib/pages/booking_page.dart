@@ -49,9 +49,13 @@ class _BookingPageState extends State<BookingPage> {
     );
 
     try {
-      await FirebaseFirestore.instance.collection('bookings').add(booking.toMap());
+      await FirebaseFirestore.instance
+          .collection('bookings')
+          .add(booking.toMap());
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Booking confirmed for $_selectedDate at $_selectedTimeSlot')),
+        SnackBar(
+            content: Text(
+                'Booking confirmed for $_selectedDate at $_selectedTimeSlot')),
       );
       // Optionally, navigate to another page or clear the selection
     } catch (e) {
@@ -105,8 +109,10 @@ class _BookingPageState extends State<BookingPage> {
                   _selectedDate = focusedDay;
                 },
                 enabledDayPredicate: (day) {
-                  // Disable weekends
-                  return !_isWeekend(day);
+                  // Disable past dates and weekends
+                  return day.isAfter(
+                          DateTime.now().subtract(const Duration(days: 1))) &&
+                      !_isWeekend(day);
                 },
                 calendarStyle: CalendarStyle(
                   outsideDaysVisible: false,
@@ -156,7 +162,9 @@ class _BookingPageState extends State<BookingPage> {
                 ),
               ),
               const SizedBox(height: 30),
-              const Text('Time slots', style: TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
+              const Text('Time slots',
+                  style:
+                      TextStyle(fontSize: 20.0, fontWeight: FontWeight.bold)),
               const SizedBox(height: 10),
               GridView.builder(
                 shrinkWrap: true,
@@ -203,7 +211,8 @@ class _BookingPageState extends State<BookingPage> {
               ElevatedButton(
                 onPressed: _bookSlot,
                 style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
                   textStyle: const TextStyle(fontSize: 16),
                 ),
                 child: const Text('BOOK'),
