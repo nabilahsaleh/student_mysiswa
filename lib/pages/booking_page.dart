@@ -185,6 +185,7 @@ class _BookingPageState extends State<BookingPage> {
                     },
                     child: Card(
                       color: _selectedTimeSlot == timeSlots[index]
+                          // ignore: prefer_const_constructors
                           ? Color(0xFF121481)
                           : Colors.white,
                       elevation: 4,
