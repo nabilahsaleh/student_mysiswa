@@ -4,19 +4,22 @@ import 'package:student_mysiswa/pages/booking_page.dart';
 import 'package:student_mysiswa/pages/profile_page.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final int selectedIndex;
+
+  const HomePage({super.key, this.selectedIndex = 0});
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  late int _selectedIndex;
 
-  static const List<Widget> _pages = <Widget>[
-    AppointmentPage(),
-    BookingPage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _selectedIndex = widget.selectedIndex;
+  }
 
   Widget getPage(int index) {
     switch (index) {
@@ -25,7 +28,7 @@ class _HomePageState extends State<HomePage> {
       case 1:
         return const BookingPage();
       case 2:
-        return ProfilePage();  // Remove const here
+        return ProfilePage();
       default:
         return const AppointmentPage();
     }
@@ -40,7 +43,7 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: getPage(_selectedIndex),  // Dynamically get the page
+      body: getPage(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
@@ -58,9 +61,9 @@ class _HomePageState extends State<HomePage> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: const Color.fromARGB(255, 247, 108, 108), // Color for the selected item
-        unselectedItemColor: const Color(0xFF212325), // Color for unselected items
-        backgroundColor: const Color(0xFFFFEAE3),// Background color of the bottom navigation bar
+        selectedItemColor: const Color.fromARGB(255, 247, 108, 108),
+        unselectedItemColor: const Color(0xFF212325),
+        backgroundColor: const Color(0xFFFFEAE3),
       ),
     );
   }

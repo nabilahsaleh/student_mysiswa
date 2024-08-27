@@ -1,14 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:student_mysiswa/helper/helper_booking.dart';
+import 'package:student_mysiswa/pages/appointment_page.dart';
+import 'package:student_mysiswa/pages/home_page.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:intl/intl.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({super.key});
 
   @override
   _BookingPageState createState() => _BookingPageState();
+}
+
+String formatDateTime(DateTime dateTime) {
+  final DateFormat formatter = DateFormat('yyyy-MM-dd HH:mm');
+  return formatter.format(dateTime);
 }
 
 class _BookingPageState extends State<BookingPage> {
@@ -20,53 +29,116 @@ class _BookingPageState extends State<BookingPage> {
     '8:30 - 9:30',
     '9:30 - 10:30',
     '10:30 - 11:30',
-    '11:30 - 12:300',
+    '11:30 - 12:30', // Corrected time slot
     '2:30 - 3:30',
     '3:30 - 4:30',
   ];
 
-  void _bookSlot() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      // Handle case where user is not logged in
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not logged in.')),
-      );
-      return;
-    }
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
-    if (_selectedTimeSlot.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a time slot.')),
-      );
-      return;
-    }
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+  }
 
-    final booking = Booking(
-      userId: currentUser.uid,
-      date: _selectedDate,
-      timeSlot: _selectedTimeSlot,
+  void _initializeNotifications() {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('mipmap/ic_notification');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+      onDidReceiveNotificationResponse:
+          (NotificationResponse notificationResponse) async {
+        if (notificationResponse.payload != null) {
+          // Check if the payload is to navigate to the appointment page
+          if (notificationResponse.payload == 'navigate_to_appointment') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AppointmentPage()),
+            );
+          }
+        }
+      },
+    );
+  }
+
+void _bookSlot() async {
+  final currentUser = FirebaseAuth.instance.currentUser;
+  if (currentUser == null) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('User not logged in.')),
+    );
+    return;
+  }
+
+  if (_selectedTimeSlot.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please select a time slot.')),
+    );
+    return;
+  }
+
+  final booking = Booking(
+    userId: currentUser.uid,
+    date: _selectedDate,
+    timeSlot: _selectedTimeSlot,
+  );
+
+  try {
+    await FirebaseFirestore.instance
+        .collection('bookings')
+        .add(booking.toMap());
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+            'Booking confirmed for $_selectedDate at $_selectedTimeSlot'),
+      ),
     );
 
-    try {
-      await FirebaseFirestore.instance
-          .collection('bookings')
-          .add(booking.toMap());
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                'Booking confirmed for $_selectedDate at $_selectedTimeSlot')),
-      );
-      // Optionally, navigate to another page or clear the selection
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to book slot: $e')),
-      );
-    }
+    _showBookingNotification(_selectedDate, _selectedTimeSlot);
+
+    // Navigate to AppointmentPage while keeping the bottom navigation bar
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const HomePage(selectedIndex: 0)),
+    );
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to book slot: $e')),
+    );
+  }
+}
+
+  void _showBookingNotification(DateTime date, String timeSlot) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'your_channel_id',
+      'Booking Notifications',
+      channelDescription: 'Notification channel for booking confirmations',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: 'mipmap/ic_notification',
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      'Booking Confirmed',
+      'Your booking for $date at $timeSlot is confirmed.',
+      platformChannelSpecifics,
+      payload: 'navigate_to_appointment', // Set payload
+    );
   }
 
   bool _isWeekend(DateTime date) {
-    // Returns true if the date is a Saturday or Sunday
     return date.weekday == 6 || date.weekday == 7;
   }
 
@@ -109,7 +181,6 @@ class _BookingPageState extends State<BookingPage> {
                   _selectedDate = focusedDay;
                 },
                 enabledDayPredicate: (day) {
-                  // Disable past dates and weekends
                   return day.isAfter(
                           DateTime.now().subtract(const Duration(days: 1))) &&
                       !_isWeekend(day);
@@ -185,7 +256,6 @@ class _BookingPageState extends State<BookingPage> {
                     },
                     child: Card(
                       color: _selectedTimeSlot == timeSlots[index]
-                          // ignore: prefer_const_constructors
                           ? Color(0xFF121481)
                           : Colors.white,
                       elevation: 4,

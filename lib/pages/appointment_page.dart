@@ -1,10 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:student_mysiswa/helper/helper_booking.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart'; // Import for notifications
 
-class AppointmentPage extends StatelessWidget {
-  const AppointmentPage({super.key});
+class AppointmentPage extends StatefulWidget {
+  const AppointmentPage({Key? key}) : super(key: key);
+
+  @override
+  _AppointmentPageState createState() => _AppointmentPageState();
+}
+
+class _AppointmentPageState extends State<AppointmentPage> {
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeNotifications();
+    _refreshAppointments();
+  }
+
+  Future<void> _refreshAppointments() async {
+    setState(() {
+      // Trigger the FutureBuilder to refresh the appointments.
+    });
+  }
 
   Future<List<Map<String, dynamic>>> _getUserBookings() async {
     final currentUser = FirebaseAuth.instance.currentUser;
@@ -89,6 +109,18 @@ class AppointmentPage extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  void _initializeNotifications() {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('mipmap/ic_notification');
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
     );
   }
 
@@ -182,7 +214,6 @@ class AppointmentPage extends StatelessWidget {
     return monthNames[month - 1];
   }
 
-  // Function to show confirmation dialog
   Future<void> _showConfirmationDialog({
     required BuildContext context,
     required String title,
@@ -215,8 +246,7 @@ class AppointmentPage extends StatelessWidget {
     );
   }
 
-  // Function to cancel an appointment
-  void _cancelAppointment(BuildContext context, String appointmentId) async {
+  Future<void> _cancelAppointment(BuildContext context, String appointmentId) async {
     try {
       await FirebaseFirestore.instance
           .collection('bookings')
@@ -225,6 +255,8 @@ class AppointmentPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Appointment canceled.')),
       );
+      _showNotification('Appointment Canceled', 'Your appointment has been canceled.');
+      _refreshAppointments(); // Refresh appointments after cancel
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to cancel appointment: $e')),
@@ -232,8 +264,7 @@ class AppointmentPage extends StatelessWidget {
     }
   }
 
-  // Function to check-in for an appointment
-  void _checkInAppointment(BuildContext context, String appointmentId) async {
+  Future<void> _checkInAppointment(BuildContext context, String appointmentId) async {
     try {
       await FirebaseFirestore.instance
           .collection('bookings')
@@ -242,10 +273,36 @@ class AppointmentPage extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Checked in successfully.')),
       );
+      _showNotification('Checked In', 'You have checked in for your appointment.');
+      _refreshAppointments(); // Refresh appointments after check-in
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to check in: $e')),
       );
     }
   }
+
+  void _showNotification(String title, String body) async {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'your_channel_id',
+      'Appointment Notifications',
+      channelDescription: 'Notification channel for appointment actions',
+      importance: Importance.max,
+      priority: Priority.high,
+      icon: 'mipmap/ic_notification',
+    );
+
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    await flutterLocalNotificationsPlugin.show(
+      0,
+      title,
+      body,
+      platformChannelSpecifics,
+      payload: 'Appointment details payload',
+    );
+  }
 }
+

@@ -1,12 +1,39 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:student_mysiswa/auth/auth.dart';
+import 'package:student_mysiswa/pages/appointment_page.dart'; // Import the AppointmentPage
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter bindings are initialized
   await Firebase.initializeApp(); // Initialize Firebase
+
+  // Initialize Firebase Messaging
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+
+  // Handle background and terminated state notification taps
+  FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+    _navigateToAppointmentPage();
+  });
+
+  // Handle notification taps when the app is in the foreground
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    _navigateToAppointmentPage();
+  });
+
   runApp(const MyApp());
 }
+
+void _navigateToAppointmentPage() {
+  navigatorKey.currentState?.push(
+    MaterialPageRoute(
+      builder: (context) => AppointmentPage(),
+    ),
+  );
+}
+
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -15,6 +42,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      navigatorKey: navigatorKey, // Set the navigator key
       theme: ThemeData(
         primarySwatch: Colors.blue,
         textTheme: const TextTheme(

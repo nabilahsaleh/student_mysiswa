@@ -3,27 +3,42 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:student_mysiswa/pages/edit_profile.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   ProfilePage({super.key});
 
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
   final User? currentUser = FirebaseAuth.instance.currentUser;
 
   Future<DocumentSnapshot<Map<String, dynamic>>> getUserDetails() async {
     if (currentUser == null) {
       throw Exception('No user is currently logged in.');
     }
-    return await FirebaseFirestore.instance.collection('users').doc(currentUser!.uid).get();
+    return await FirebaseFirestore.instance
+        .collection('users')
+        .doc(currentUser!.uid)
+        .get();
   }
 
   void logout() {
     FirebaseAuth.instance.signOut();
   }
 
-  void navigateToEditProfile(BuildContext context) {
-    Navigator.push(
+  void navigateToEditProfile(BuildContext context) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => EditProfilePage()),
     );
+
+    // If the result is true, refresh the profile page
+    if (result == true) {
+      setState(() {
+        // Trigger a refresh by rebuilding the FutureBuilder
+      });
+    }
   }
 
   void showProfilePictureDialog(BuildContext context) {
@@ -40,7 +55,6 @@ class ProfilePage extends StatelessWidget {
                   Navigator.of(context).pop();
                   updateProfilePicture('assets/male.png');
                 },
-              
                 child: Image.asset(
                   'assets/male.png',
                   width: 80,
@@ -79,7 +93,8 @@ class ProfilePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFFFEAE3),
       appBar: AppBar(
-        title: const Text('P R O F I L E', style: TextStyle(color: Colors.black)),
+        title:
+            const Text('P R O F I L E', style: TextStyle(color: Colors.black)),
         backgroundColor: const Color(0xFFFFEAE3),
         elevation: 0,
         centerTitle: true,
@@ -139,12 +154,14 @@ class ProfilePage extends StatelessWidget {
           onPressed: () => navigateToEditProfile(context),
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF121481),
-            padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30.0),
+            padding:
+                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          child: const Text('Edit Profile', style: TextStyle(color: Colors.white, fontSize: 18)),
+          child: const Text('Edit Profile',
+              style: TextStyle(color: Colors.white, fontSize: 18)),
         ),
       ),
     );
@@ -155,7 +172,8 @@ class ProfilePage extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       decoration: const BoxDecoration(
         border: Border(
-          bottom: BorderSide(color: Color.fromARGB(255, 211, 201, 201), width: 1.0),
+          bottom:
+              BorderSide(color: Color.fromARGB(255, 211, 201, 201), width: 1.0),
         ),
       ),
       child: Row(

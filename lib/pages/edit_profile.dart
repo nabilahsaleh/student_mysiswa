@@ -62,7 +62,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
           SnackBar(content: Text('Profile updated successfully')),
         );
 
-        Navigator.pop(context);
+        Navigator.pop(
+            context, true); // Pass `true` to indicate changes were made
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Failed to update profile: $e')),
@@ -70,6 +71,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
       }
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +142,8 @@ class _EditProfilePageState extends State<EditProfilePage> {
             color: Color(0xFF37474F),
           ),
           decoration: const InputDecoration(
-            contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
+            contentPadding:
+                EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
             border: OutlineInputBorder(
               borderSide: BorderSide(color: Color(0xFFB0BEC5)),
             ),
