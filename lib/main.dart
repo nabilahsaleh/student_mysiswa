@@ -2,7 +2,8 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:student_mysiswa/auth/auth.dart';
-import 'package:student_mysiswa/pages/appointment_page.dart'; // Import the AppointmentPage
+import 'package:student_mysiswa/fcm_service.dart';
+import 'package:student_mysiswa/pages/appointment_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized(); // Ensure Flutter bindings are initialized
@@ -20,6 +21,10 @@ void main() async {
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     _navigateToAppointmentPage();
   });
+
+
+  final FCMService fcmService = FCMService();
+  await fcmService.initialize();
 
   runApp(const MyApp());
 }

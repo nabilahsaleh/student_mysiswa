@@ -11,7 +11,8 @@ class AppointmentPage extends StatefulWidget {
 }
 
 class _AppointmentPageState extends State<AppointmentPage> {
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void initState() {
@@ -38,10 +39,12 @@ class _AppointmentPageState extends State<AppointmentPage> {
         .orderBy('date', descending: true)
         .get();
 
-    return snapshot.docs.map((doc) => {
-      'id': doc.id,
-      ...doc.data(),
-    }).toList();
+    return snapshot.docs
+        .map((doc) => {
+              'id': doc.id,
+              ...doc.data(),
+            })
+        .toList();
   }
 
   @override
@@ -63,8 +66,16 @@ class _AppointmentPageState extends State<AppointmentPage> {
               return const Center(child: Text('No appointments found.'));
             }
 
-            final upcomingAppointments = snapshot.data!.where((booking) => booking['status'] == 'scheduled').toList();
-            final pastAppointments = snapshot.data!.where((booking) => booking['status'] == 'canceled' || booking['status'] == 'completed').toList();
+            final upcomingAppointments = snapshot.data!
+                .where((booking) =>
+                    booking['status'] == 'scheduled' ||
+                    booking['status'] == 'in-progress')
+                .toList();
+            final pastAppointments = snapshot.data!
+                .where((booking) =>
+                    booking['status'] == 'canceled' ||
+                    booking['status'] == 'completed')
+                .toList();
 
             return SingleChildScrollView(
               child: Column(
@@ -134,6 +145,25 @@ class _AppointmentPageState extends State<AppointmentPage> {
   }) {
     final formattedDate = "${date.day} ${_monthName(date.month)} ${date.year}";
 
+    // Define a color based on the status
+    Color statusColor;
+    switch (status) {
+      case 'scheduled':
+        statusColor = Colors.blue;
+        break;
+      case 'in-progress':
+        statusColor = Colors.orange;
+        break;
+      case 'canceled':
+        statusColor = Colors.red;
+        break;
+      case 'completed':
+        statusColor = Colors.green;
+        break;
+      default:
+        statusColor = Colors.black;
+    }
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
@@ -161,10 +191,16 @@ class _AppointmentPageState extends State<AppointmentPage> {
             const SizedBox(height: 5),
             Text(
               'Status: $status',
-              style: const TextStyle(fontSize: 16),
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold, // Make the text bold
+                color: statusColor, // Change the text color based on status
+              ),
             ),
             const SizedBox(height: 10),
-            if (isUpcoming)
+
+            // Conditionally render buttons only for upcoming appointments that are not in-progress
+            if (isUpcoming && status != 'in-progress')
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -173,7 +209,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       _showConfirmationDialog(
                         context: context,
                         title: 'Cancel Appointment',
-                        content: 'Are you sure you want to cancel this appointment?',
+                        content:
+                            'Are you sure you want to cancel this appointment?',
                         onConfirm: () {
                           _cancelAppointment(context, appointmentId);
                         },
@@ -190,7 +227,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                       _showConfirmationDialog(
                         context: context,
                         title: 'Check-In',
-                        content: 'Are you sure you want to check in for this appointment?',
+                        content:
+                            'Are you sure you want to check in for this appointment?',
                         onConfirm: () {
                           _checkInAppointment(context, appointmentId);
                         },
@@ -208,8 +246,18 @@ class _AppointmentPageState extends State<AppointmentPage> {
 
   String _monthName(int month) {
     const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
     ];
     return monthNames[month - 1];
   }
@@ -246,7 +294,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
     );
   }
 
-  Future<void> _cancelAppointment(BuildContext context, String appointmentId) async {
+  Future<void> _cancelAppointment(
+      BuildContext context, String appointmentId) async {
     try {
       await FirebaseFirestore.instance
           .collection('bookings')
@@ -255,7 +304,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Appointment canceled.')),
       );
-      _showNotification('Appointment Canceled', 'Your appointment has been canceled.');
+      _showNotification(
+          'Appointment Canceled', 'Your appointment has been canceled.');
       _refreshAppointments(); // Refresh appointments after cancel
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -264,7 +314,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
     }
   }
 
-  Future<void> _checkInAppointment(BuildContext context, String appointmentId) async {
+  Future<void> _checkInAppointment(
+      BuildContext context, String appointmentId) async {
     try {
       await FirebaseFirestore.instance
           .collection('bookings')
@@ -273,7 +324,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Checked in successfully.')),
       );
-      _showNotification('Checked In', 'You have checked in for your appointment.');
+      _showNotification(
+          'Checked In', 'You have checked in for your appointment.');
       _refreshAppointments(); // Refresh appointments after check-in
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -305,4 +357,3 @@ class _AppointmentPageState extends State<AppointmentPage> {
     );
   }
 }
-
