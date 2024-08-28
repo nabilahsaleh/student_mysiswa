@@ -85,6 +85,11 @@ class _ProfilePageState extends State<ProfilePage> {
           .collection('users')
           .doc(currentUser!.uid)
           .update({'profile_picture': imagePath});
+
+      // Refresh the page after updating the profile picture
+      setState(() {
+        // Trigger a rebuild to reflect the new profile picture
+      });
     }
   }
 
