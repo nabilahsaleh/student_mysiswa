@@ -59,7 +59,7 @@ class _BookingPageState extends State<BookingPage> {
           if (notificationResponse.payload == 'navigate_to_appointment') {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => AppointmentPage()),
+              MaterialPageRoute(builder: (context) => const AppointmentPage()),
             );
           }
         }
@@ -67,53 +67,54 @@ class _BookingPageState extends State<BookingPage> {
     );
   }
 
-void _bookSlot() async {
-  final currentUser = FirebaseAuth.instance.currentUser;
-  if (currentUser == null) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('User not logged in.')),
+  void _bookSlot() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not logged in.')),
+      );
+      return;
+    }
+
+    if (_selectedTimeSlot.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please select a time slot.')),
+      );
+      return;
+    }
+
+    final booking = Booking(
+      userId: currentUser.uid,
+      date: _selectedDate,
+      timeSlot: _selectedTimeSlot,
     );
-    return;
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('bookings')
+          .add(booking.toMap());
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              'Booking confirmed for $_selectedDate at $_selectedTimeSlot'),
+        ),
+      );
+
+      _showBookingNotification(_selectedDate, _selectedTimeSlot);
+
+      // Navigate to AppointmentPage while keeping the bottom navigation bar
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => const HomePage(selectedIndex: 0)),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to book slot: $e')),
+      );
+    }
   }
-
-  if (_selectedTimeSlot.isEmpty) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Please select a time slot.')),
-    );
-    return;
-  }
-
-  final booking = Booking(
-    userId: currentUser.uid,
-    date: _selectedDate,
-    timeSlot: _selectedTimeSlot,
-  );
-
-  try {
-    await FirebaseFirestore.instance
-        .collection('bookings')
-        .add(booking.toMap());
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-            'Booking confirmed for $_selectedDate at $_selectedTimeSlot'),
-      ),
-    );
-
-    _showBookingNotification(_selectedDate, _selectedTimeSlot);
-
-    // Navigate to AppointmentPage while keeping the bottom navigation bar
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const HomePage(selectedIndex: 0)),
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('Failed to book slot: $e')),
-    );
-  }
-}
 
   void _showBookingNotification(DateTime date, String timeSlot) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
@@ -145,90 +146,93 @@ void _bookSlot() async {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFEAE3),
+      backgroundColor: const Color(0xFF9BBFDD),
       appBar: AppBar(
         title: const Center(child: Text('B O O K I N G')),
-        backgroundColor: const Color(0xFFFFEAE3),
+        backgroundColor: const Color(0xFF9BBFDD),
       ),
       body: SingleChildScrollView(
         child: Container(
           padding: const EdgeInsets.all(25.0),
-          color: Colors.grey.shade200,
+          color: const Color(0xFF9BBFDD),
           child: Column(
             children: [
-              TableCalendar(
-                firstDay: DateTime(2000),
-                lastDay: DateTime(2101),
-                focusedDay: _selectedDate,
-                calendarFormat: _calendarFormat,
-                selectedDayPredicate: (day) {
-                  return isSameDay(_selectedDate, day);
-                },
-                onDaySelected: (selectedDay, focusedDay) {
-                  setState(() {
-                    _selectedDate = selectedDay;
-                    _calendarFormat = CalendarFormat.month;
-                  });
-                },
-                onFormatChanged: (format) {
-                  if (_calendarFormat != format) {
+              Container(
+                color: Colors.white, // Set background color for the calendar
+                child: TableCalendar(
+                  firstDay: DateTime(2000),
+                  lastDay: DateTime(2101),
+                  focusedDay: _selectedDate,
+                  calendarFormat: _calendarFormat,
+                  selectedDayPredicate: (day) {
+                    return isSameDay(_selectedDate, day);
+                  },
+                  onDaySelected: (selectedDay, focusedDay) {
                     setState(() {
-                      _calendarFormat = format;
+                      _selectedDate = selectedDay;
+                      _calendarFormat = CalendarFormat.month;
                     });
-                  }
-                },
-                onPageChanged: (focusedDay) {
-                  _selectedDate = focusedDay;
-                },
-                enabledDayPredicate: (day) {
-                  return day.isAfter(
-                          DateTime.now().subtract(const Duration(days: 1))) &&
-                      !_isWeekend(day);
-                },
-                calendarStyle: CalendarStyle(
-                  outsideDaysVisible: false,
-                  todayTextStyle: const TextStyle(color: Colors.white),
-                  todayDecoration: const BoxDecoration(
-                    color: Color(0xFFFFCBCB),
-                    shape: BoxShape.circle,
+                  },
+                  onFormatChanged: (format) {
+                    if (_calendarFormat != format) {
+                      setState(() {
+                        _calendarFormat = format;
+                      });
+                    }
+                  },
+                  onPageChanged: (focusedDay) {
+                    _selectedDate = focusedDay;
+                  },
+                  enabledDayPredicate: (day) {
+                    return day.isAfter(
+                            DateTime.now().subtract(const Duration(days: 1))) &&
+                        !_isWeekend(day);
+                  },
+                  calendarStyle: CalendarStyle(
+                    outsideDaysVisible: false,
+                    todayTextStyle: const TextStyle(color: Colors.white),
+                    todayDecoration: const BoxDecoration(
+                      color: Color(0xFFFFCBCB),
+                      shape: BoxShape.circle,
+                    ),
+                    selectedTextStyle: const TextStyle(color: Colors.white),
+                    selectedDecoration: const BoxDecoration(
+                      color: Color.fromARGB(255, 247, 108, 108),
+                      shape: BoxShape.circle,
+                    ),
+                    weekendTextStyle: TextStyle(color: Colors.red[800]),
+                    defaultTextStyle: const TextStyle(color: Colors.black),
+                    holidayTextStyle: const TextStyle(color: Colors.green),
+                    weekendDecoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
+                    defaultDecoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                    ),
                   ),
-                  selectedTextStyle: const TextStyle(color: Colors.white),
-                  selectedDecoration: const BoxDecoration(
-                    color: Color.fromARGB(255, 247, 108, 108),
-                    shape: BoxShape.circle,
+                  daysOfWeekStyle: const DaysOfWeekStyle(
+                    weekendStyle: TextStyle(color: Color(0xFF121481)),
+                    weekdayStyle: TextStyle(color: Colors.black),
                   ),
-                  weekendTextStyle: TextStyle(color: Colors.red[800]),
-                  defaultTextStyle: const TextStyle(color: Colors.black),
-                  holidayTextStyle: const TextStyle(color: Colors.green),
-                  weekendDecoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  defaultDecoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                daysOfWeekStyle: const DaysOfWeekStyle(
-                  weekendStyle: TextStyle(color: Color(0xFF121481)),
-                  weekdayStyle: TextStyle(color: Colors.black),
-                ),
-                headerStyle: HeaderStyle(
-                  titleTextStyle: const TextStyle(
-                    fontSize: 20.0,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                  formatButtonTextStyle: const TextStyle(color: Colors.white),
-                  formatButtonDecoration: BoxDecoration(
-                    color: const Color(0xFF121481),
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  leftChevronIcon: const Icon(
-                    Icons.chevron_left,
-                    color: Colors.black,
-                  ),
-                  rightChevronIcon: const Icon(
-                    Icons.chevron_right,
-                    color: Colors.black,
+                  headerStyle: HeaderStyle(
+                    titleTextStyle: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black,
+                    ),
+                    formatButtonTextStyle: const TextStyle(color: Colors.white),
+                    formatButtonDecoration: BoxDecoration(
+                      color: const Color(0xFF121481),
+                      borderRadius: BorderRadius.circular(16.0),
+                    ),
+                    leftChevronIcon: const Icon(
+                      Icons.chevron_left,
+                      color: Colors.black,
+                    ),
+                    rightChevronIcon: const Icon(
+                      Icons.chevron_right,
+                      color: Colors.black,
+                    ),
                   ),
                 ),
               ),
@@ -256,7 +260,7 @@ void _bookSlot() async {
                     },
                     child: Card(
                       color: _selectedTimeSlot == timeSlots[index]
-                          ? Color(0xFF121481)
+                          ? const Color(0xFF121481)
                           : Colors.white,
                       elevation: 4,
                       shape: RoundedRectangleBorder(
@@ -284,9 +288,19 @@ void _bookSlot() async {
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                  textStyle: const TextStyle(fontSize: 16),
+                  backgroundColor:
+                      const Color.fromARGB(255, 247, 108, 108), // Pink color
+                  shape: RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.circular(10), // Same corner radius
+                  ),
                 ),
-                child: const Text('BOOK'),
+                child: const Text(
+                  'BOOK',
+                  style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.white), // Consistent font size and color
+                ),
               ),
             ],
           ),

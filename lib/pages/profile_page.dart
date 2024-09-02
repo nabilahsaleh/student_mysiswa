@@ -96,11 +96,11 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFEAE3),
+      backgroundColor: const Color(0xFF9BBFDD),
       appBar: AppBar(
         title:
             const Text('P R O F I L E', style: TextStyle(color: Colors.black)),
-        backgroundColor: const Color(0xFFFFEAE3),
+        backgroundColor: const Color(0xFF9BBFDD),
         elevation: 0,
         centerTitle: true,
         actions: [
@@ -158,15 +158,20 @@ class _ProfilePageState extends State<ProfilePage> {
         child: ElevatedButton(
           onPressed: () => navigateToEditProfile(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF121481),
-            padding:
-                const EdgeInsets.symmetric(vertical: 16.0, horizontal: 30.0),
+            backgroundColor:
+                const Color.fromARGB(255, 247, 108, 108),
+            padding: const EdgeInsets.symmetric(
+                vertical: 10.0, horizontal: 40.0),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
           ),
-          child: const Text('Edit Profile',
-              style: TextStyle(color: Colors.white, fontSize: 18)),
+          child: const Text(
+            'EDIT PROFILE',
+            style: TextStyle(
+                color: Colors.white,
+                fontSize: 18),
+          ),
         ),
       ),
     );
@@ -174,11 +179,11 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget buildUserInfoRow(String title, String? value) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 20.0),
       decoration: const BoxDecoration(
         border: Border(
           bottom:
-              BorderSide(color: Color.fromARGB(255, 211, 201, 201), width: 1.0),
+              BorderSide(color: Colors.black, width: 1.0),
         ),
       ),
       child: Row(

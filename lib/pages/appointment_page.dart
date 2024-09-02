@@ -50,8 +50,14 @@ class _AppointmentPageState extends State<AppointmentPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF9BBFDD),
       appBar: AppBar(
-        title: const Center(child: Text('A P P O I N T M E N T S')),
+        backgroundColor: const Color(0xFF9BBFDD),
+        title: const Center(
+          child: Text(
+            'A P P O I N T M E N T S'
+          ),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(25.0),
@@ -165,6 +171,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
     }
 
     return Card(
+      color: const Color(0xFFC7DCED),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
       ),
@@ -223,6 +230,12 @@ class _AppointmentPageState extends State<AppointmentPage> {
                   ),
                   const SizedBox(width: 10),
                   ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF121481),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
                     onPressed: () {
                       _showConfirmationDialog(
                         context: context,
@@ -234,7 +247,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         },
                       );
                     },
-                    child: const Text('Check-In'),
+                    child: const Text('Check-In', style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),

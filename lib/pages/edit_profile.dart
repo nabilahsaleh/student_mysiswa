@@ -72,16 +72,16 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF9BBFDD),
       appBar: AppBar(
+        backgroundColor: const Color(0xFF9BBFDD),
         title: const Text(
           'E D I T  P R O F I L E',
           style: TextStyle(color: Colors.black),
         ),
-        backgroundColor: const Color(0xFFFFEAE3),
         elevation: 0,
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
@@ -94,24 +94,30 @@ class _EditProfilePageState extends State<EditProfilePage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildTextField('Name', _nameController),
-              const SizedBox(height: 20),
+              const SizedBox(height: 35),
               _buildTextField('Phone', _phoneController),
-              const SizedBox(height: 20),
+              const SizedBox(height: 35),
               _buildTextField('Student ID', _idController),
-              const SizedBox(height: 30),
-              ElevatedButton(
-                onPressed: _saveChanges,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF121481),
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
+              const SizedBox(height: 60),
+              Center(
+                child: ElevatedButton(
+                  onPressed: _saveChanges,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        const Color.fromARGB(255, 247, 108, 108), // Pink color
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 10.0,
+                        horizontal: 40.0), // Uniform padding for size consistency
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                          10), // Consistent rounded corners
+                    ),
                   ),
-                ),
-                child: const Center(
-                  child: Text(
-                    'Save Changes',
-                    style: TextStyle(color: Colors.white, fontSize: 18),
+                  child: const Text(
+                    'SAVE CHANGES',
+                    style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18), // Consistent text style
                   ),
                 ),
               ),
@@ -145,7 +151,24 @@ class _EditProfilePageState extends State<EditProfilePage> {
             contentPadding:
                 EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0),
             border: OutlineInputBorder(
-              borderSide: BorderSide(color: Color(0xFFB0BEC5)),
+              borderSide:
+                  BorderSide(color: Colors.white), // Default border color
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide:
+                  BorderSide(color: Colors.white), // White border when enabled
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                  color: Color(0xFF435A7F), width: 3.0), // White border when focused
+            ),
+            errorBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                  color: Colors.red, width: 3.0), // Red border on error
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderSide: BorderSide(
+                  color: Colors.red, width: 3.0), // Red border on focused error
             ),
           ),
           validator: (value) {

@@ -61,9 +61,9 @@ class _HomePageState extends State<HomePage> {
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
-        selectedItemColor: const Color.fromARGB(255, 247, 108, 108),
-        unselectedItemColor: const Color(0xFF212325),
-        backgroundColor: const Color(0xFFFFEAE3),
+        selectedItemColor: Colors.black,
+        unselectedItemColor: Colors.white,
+        backgroundColor: const Color(0xFF435A7F),
       ),
     );
   }

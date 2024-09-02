@@ -71,7 +71,7 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F4),
+      backgroundColor: const Color(0xFF9BBFDD),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(25.0),
@@ -113,7 +113,7 @@ class _LoginPageState extends State<LoginPage> {
                   Text(
                     'Forgot Password?',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Color.fromARGB(255, 111, 111, 111),
                     ),
                   ),
                 ],
@@ -127,7 +127,7 @@ class _LoginPageState extends State<LoginPage> {
                   const Text(
                     'Don\'t have an account?',
                     style: TextStyle(
-                      color: Colors.grey,
+                      color: Color.fromARGB(255, 111, 111, 111),
                     ),
                   ),
                   GestureDetector(

@@ -77,14 +77,20 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F4),
+      backgroundColor: const Color(0xFF9BBFDD),
       body: SingleChildScrollView(
         child: Padding(
           padding: const EdgeInsets.all(25.0),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 0),
+              const SizedBox(height: 10),
+              Image.asset(
+                'assets/logo.png',
+                width: 100,
+                height: 100,
+              ),
+              const SizedBox(height: 20),
               // App name
               const Text(
                 'SiswaCard',
@@ -148,7 +154,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 children: [
                   const Text(
                     'Already have an account?',
-                    style: TextStyle(color: Colors.grey),
+                    style: TextStyle(color: Color.fromARGB(255, 111, 111, 111)),
                   ),
                   GestureDetector(
                     onTap: widget.onTap,

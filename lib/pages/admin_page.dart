@@ -9,7 +9,7 @@ class AdminPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Admin Dashboard'),
       ),
-      body: Center(
+      body: const Center(
         child: Text(
           'Welcome Admin',
           style: TextStyle(fontSize: 24),
