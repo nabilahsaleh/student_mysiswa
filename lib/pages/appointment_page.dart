@@ -13,17 +13,44 @@ class AppointmentPage extends StatefulWidget {
 class _AppointmentPageState extends State<AppointmentPage> {
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
+  late Stream<List<Map<String, dynamic>>> _appointmentStream;
 
   @override
   void initState() {
     super.initState();
     _initializeNotifications();
-    _refreshAppointments();
+    _setUpFirestoreListener();
   }
 
-  Future<void> _refreshAppointments() async {
-    setState(() {
-      // Trigger the FutureBuilder to refresh the appointments.
+  void _setUpFirestoreListener() {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      throw Exception('User not logged in.');
+    }
+
+    _appointmentStream = FirebaseFirestore.instance
+        .collection('bookings')
+        .where('userId', isEqualTo: currentUser.uid)
+        .orderBy('date', descending: true)
+        .snapshots()
+        .map((snapshot) => snapshot.docs
+            .map((doc) => {
+                  'id': doc.id,
+                  ...doc.data() as Map<String, dynamic>,
+                })
+            .toList());
+
+    // Handle Firestore changes
+    _appointmentStream.listen((appointments) {
+      for (var appointment in appointments) {
+        String status = appointment['status'] ?? '';
+        if (status == 'canceled' || status == 'completed') {
+          _showNotification(
+              id: appointment['id'], // Unique ID for each notification
+              title: 'Appointment Update',
+              body: 'Your appointment has been $status.');
+        }
+      }
     });
   }
 
@@ -55,14 +82,14 @@ class _AppointmentPageState extends State<AppointmentPage> {
         backgroundColor: const Color(0xFF9BBFDD),
         title: const Center(
           child: Text(
-            'A P P O I N T M E N T S'
+            'A P P O I N T M E N T S',
           ),
         ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(25.0),
-        child: FutureBuilder<List<Map<String, dynamic>>>(
-          future: _getUserBookings(),
+        child: StreamBuilder<List<Map<String, dynamic>>>(
+          stream: _appointmentStream,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
@@ -80,7 +107,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
             final pastAppointments = snapshot.data!
                 .where((booking) =>
                     booking['status'] == 'canceled' ||
-                    booking['status'] == 'completed')
+                    booking['status'] == 'completed' ||
+                    booking['status'] == 'canceled by admin')
                 .toList();
 
             return SingleChildScrollView(
@@ -161,6 +189,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         statusColor = Colors.orange;
         break;
       case 'canceled':
+      case 'canceled by admin':
         statusColor = Colors.red;
         break;
       case 'completed':
@@ -247,7 +276,8 @@ class _AppointmentPageState extends State<AppointmentPage> {
                         },
                       );
                     },
-                    child: const Text('Check-In', style: TextStyle(color: Colors.white)),
+                    child: const Text('Check-In',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -318,8 +348,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
         const SnackBar(content: Text('Appointment canceled.')),
       );
       _showNotification(
-          'Appointment Canceled', 'Your appointment has been canceled.');
-      _refreshAppointments(); // Refresh appointments after cancel
+          id: appointmentId, // Unique ID for each notification
+          title: 'Appointment Canceled',
+          body: 'Your appointment has been canceled.');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to cancel appointment: $e')),
@@ -338,8 +369,9 @@ class _AppointmentPageState extends State<AppointmentPage> {
         const SnackBar(content: Text('Checked in successfully.')),
       );
       _showNotification(
-          'Checked In', 'You have checked in for your appointment.');
-      _refreshAppointments(); // Refresh appointments after check-in
+          id: appointmentId, // Unique ID for each notification
+          title: 'Checked In',
+          body: 'You have checked in for your appointment.');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to check in: $e')),
@@ -347,22 +379,26 @@ class _AppointmentPageState extends State<AppointmentPage> {
     }
   }
 
-  void _showNotification(String title, String body) async {
+  void _showNotification({
+    required String id, // Unique ID for each notification
+    required String title,
+    required String body,
+  }) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
-        AndroidNotificationDetails(
-      'your_channel_id',
-      'Appointment Notifications',
-      channelDescription: 'Notification channel for appointment actions',
-      importance: Importance.max,
-      priority: Priority.high,
-      icon: 'mipmap/ic_notification',
-    );
+      AndroidNotificationDetails(
+    'appointment_channel', // Same channel ID
+    'Appointment Notifications',
+    channelDescription: 'Notifications related to appointment actions',
+    importance: Importance.max,
+    priority: Priority.high,
+    icon: 'mipmap/ic_notification',
+  );
 
     const NotificationDetails platformChannelSpecifics =
         NotificationDetails(android: androidPlatformChannelSpecifics);
 
     await flutterLocalNotificationsPlugin.show(
-      0,
+      int.parse(id), // Use appointmentId as the notification ID
       title,
       body,
       platformChannelSpecifics,

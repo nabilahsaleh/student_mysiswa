@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:student_mysiswa/helper/helper_booking.dart';
-import 'package:student_mysiswa/pages/appointment_page.dart';
 import 'package:student_mysiswa/pages/home_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:intl/intl.dart';
@@ -29,7 +28,7 @@ class _BookingPageState extends State<BookingPage> {
     '8:30 - 9:30',
     '9:30 - 10:30',
     '10:30 - 11:30',
-    '11:30 - 12:30', // Corrected time slot
+    '11:30 - 12:30',
     '2:30 - 3:30',
     '3:30 - 4:30',
   ];
@@ -55,11 +54,11 @@ class _BookingPageState extends State<BookingPage> {
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) async {
         if (notificationResponse.payload != null) {
-          // Check if the payload is to navigate to the appointment page
           if (notificationResponse.payload == 'navigate_to_appointment') {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const AppointmentPage()),
+              MaterialPageRoute(
+                  builder: (context) => const HomePage(selectedIndex: 0)),
             );
           }
         }
@@ -103,7 +102,6 @@ class _BookingPageState extends State<BookingPage> {
 
       _showBookingNotification(_selectedDate, _selectedTimeSlot);
 
-      // Navigate to AppointmentPage while keeping the bottom navigation bar
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -119,9 +117,9 @@ class _BookingPageState extends State<BookingPage> {
   void _showBookingNotification(DateTime date, String timeSlot) async {
     const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
-      'your_channel_id',
-      'Booking Notifications',
-      channelDescription: 'Notification channel for booking confirmations',
+      'appointment_channel', // Same channel ID
+      'Appointment Notifications',
+      channelDescription: 'Notifications related to appointment bookings',
       importance: Importance.max,
       priority: Priority.high,
       icon: 'mipmap/ic_notification',
@@ -135,7 +133,7 @@ class _BookingPageState extends State<BookingPage> {
       'Booking Confirmed',
       'Your booking for $date at $timeSlot is confirmed.',
       platformChannelSpecifics,
-      payload: 'navigate_to_appointment', // Set payload
+      payload: 'navigate_to_appointment',
     );
   }
 
@@ -158,7 +156,7 @@ class _BookingPageState extends State<BookingPage> {
           child: Column(
             children: [
               Container(
-                color: Colors.white, // Set background color for the calendar
+                color: Colors.white,
                 child: TableCalendar(
                   firstDay: DateTime(2000),
                   lastDay: DateTime(2101),
@@ -288,18 +286,14 @@ class _BookingPageState extends State<BookingPage> {
                 style: ElevatedButton.styleFrom(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 40, vertical: 10),
-                  backgroundColor:
-                      const Color.fromARGB(255, 247, 108, 108), // Pink color
+                  backgroundColor: const Color.fromARGB(255, 247, 108, 108),
                   shape: RoundedRectangleBorder(
-                    borderRadius:
-                        BorderRadius.circular(10), // Same corner radius
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: const Text(
                   'BOOK',
-                  style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.white), // Consistent font size and color
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
             ],
