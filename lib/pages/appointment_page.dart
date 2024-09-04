@@ -82,7 +82,7 @@ class _AppointmentPageState extends State<AppointmentPage> {
         backgroundColor: const Color(0xFF9BBFDD),
         title: const Center(
           child: Text(
-            'A P P O I N T M E N T S',
+            'A P P O I N T M E N T ',
           ),
         ),
       ),

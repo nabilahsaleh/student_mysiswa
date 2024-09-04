@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:student_mysiswa/pages/appointment_page.dart';
 import 'package:student_mysiswa/pages/booking_page.dart';
 import 'package:student_mysiswa/pages/profile_page.dart';
+import 'package:student_mysiswa/pages/announcement_page.dart';
 
 class HomePage extends StatefulWidget {
   final int selectedIndex;
@@ -22,17 +23,20 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget getPage(int index) {
-    switch (index) {
-      case 0:
-        return const AppointmentPage();
-      case 1:
-        return const BookingPage();
-      case 2:
-        return ProfilePage();
-      default:
-        return const AppointmentPage();
-    }
+  switch (index) {
+    case 0:
+      return const AppointmentPage();
+    case 1:
+      return const BookingPage();
+    case 2:
+      return ProfilePage();
+    case 3:
+      return const AnnouncementPage(); // Add Announcement Page case
+    default:
+      return const AppointmentPage();
   }
+}
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -41,30 +45,36 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: getPage(_selectedIndex),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Appointments',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.book),
-            label: 'Booking',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        selectedItemColor: Colors.black,
-        unselectedItemColor: Colors.white,
-        backgroundColor: const Color(0xFF435A7F),
-      ),
-    );
-  }
+Widget build(BuildContext context) {
+  return Scaffold(
+    body: getPage(_selectedIndex),
+    bottomNavigationBar: BottomNavigationBar(
+      type: BottomNavigationBarType.fixed,
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: Icon(Icons.calendar_today),
+          label: 'Appointment',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.book),
+          label: 'Booking',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+        BottomNavigationBarItem( // New Announcement item
+          icon: Icon(Icons.announcement),
+          label: 'Announcement',
+        ),
+      ],
+      currentIndex: _selectedIndex,
+      onTap: _onItemTapped,
+      selectedItemColor: Colors.black,
+      unselectedItemColor: Colors.white,
+      backgroundColor: const Color(0xFF435A7F),
+    ),
+  );
+}
+
 }
