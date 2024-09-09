@@ -31,7 +31,7 @@ class _HomePageState extends State<HomePage> {
     case 2:
       return ProfilePage();
     case 3:
-      return const AnnouncementPage(); // Add Announcement Page case
+      return const AnnouncementPage();
     default:
       return const AppointmentPage();
   }
@@ -63,7 +63,7 @@ Widget build(BuildContext context) {
           icon: Icon(Icons.person),
           label: 'Profile',
         ),
-        BottomNavigationBarItem( // New Announcement item
+        BottomNavigationBarItem(
           icon: Icon(Icons.announcement),
           label: 'Announcement',
         ),

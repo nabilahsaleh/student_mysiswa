@@ -5,7 +5,7 @@ import 'package:student_mysiswa/components/my_button.dart';
 import 'package:student_mysiswa/components/my_textfield.dart';
 import 'package:student_mysiswa/helper/helper_functions.dart';
 import 'package:student_mysiswa/pages/home_page.dart';
-import 'package:student_mysiswa/pages/admin_page.dart'; // Assume this is your admin page
+import 'package:student_mysiswa/pages/admin_page.dart'; 
 
 class LoginPage extends StatefulWidget {
   final void Function()? onTap;
@@ -22,6 +22,22 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+
+  // Method for password reset
+  void resetPassword() async {
+    if (emailController.text.isEmpty) {
+      // Display a message if the email field is empty
+      displayMessageToUser("Please enter your email", context);
+      return;
+    }
+
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text);
+      displayMessageToUser("Password reset link sent to your email", context);
+    } on FirebaseAuthException catch (e) {
+      displayMessageToUser(e.message ?? "An error occurred", context);
+    }
+  }
 
   void login() async {
     // Show loading circle
@@ -107,13 +123,17 @@ class _LoginPageState extends State<LoginPage> {
                 icon: Icons.lock,
               ),
               const SizedBox(height: 10),
-              const Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  Text(
-                    'Forgot Password?',
-                    style: TextStyle(
-                      color: Color.fromARGB(255, 111, 111, 111),
+                  GestureDetector(
+                    onTap: resetPassword, // Trigger password reset
+                    child: const Text(
+                      'Forgot Password?',
+                      style: TextStyle(
+                        color: Color.fromARGB(255, 111, 111, 111),
+                        decoration: TextDecoration.underline,
+                      ),
                     ),
                   ),
                 ],
@@ -149,3 +169,4 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 }
+
